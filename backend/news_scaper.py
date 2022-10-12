@@ -1,3 +1,7 @@
+from urllib.request import urlopen
+from datetime import datetime
+from bs4 import BeautifulSoup
+
 def get_html(url):
   page = urlopen(url)
   html_bytes = page.read()
