@@ -3,7 +3,7 @@ import psycopg2.extras  # We'll need this to convert SQL responses into dictiona
 from flask import Flask, current_app, jsonify
 
 app = Flask(__name__)
-
+conn = get_db_connection()
 
 @app.route("/", methods=["GET"])
 def index():
@@ -14,3 +14,10 @@ def index():
 def stories():
     data = {}
     return jsonify(data)
+
+def get_db_connection():
+  try:
+    conn = psycopg2.connect("dbname=social_news user=postgres host=localhost")
+    return conn
+  except:
+    print("Error connecting to database.")
