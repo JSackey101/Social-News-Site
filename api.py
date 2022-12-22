@@ -1,4 +1,4 @@
-import psycopg2 #
+import psycopg2 
 import psycopg2.extras  # We'll need this to convert SQL responses into Dictionaries
 from flask import Flask, current_app, jsonify
 
