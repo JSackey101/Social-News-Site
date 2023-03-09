@@ -17,7 +17,6 @@ def stories():
 
 def get_db_connection():
   try:
-    conn = psycopg2.connect("dbname=social_news user=postgres host=localhost")
-    return conn
+    return psycopg2.connect("dbname=social_news user=postgres host=localhost")
   except:
     print("Error connecting to database.")
