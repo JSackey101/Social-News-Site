@@ -1,6 +1,6 @@
 from flask import Flask, current_app, jsonify
 
-stories = [
+data = [
     {
         "id": 0,
         "title": "Abdul Sharifu Was Buying Milk For A Neighbor's Baby. A Snowstorm Killed Him. ",
@@ -38,5 +38,4 @@ def index():
 
 @app.route("/stories", methods=["GET"])
 def stories():
-    data = {}
     return jsonify(data)
