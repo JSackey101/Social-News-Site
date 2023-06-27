@@ -1,32 +1,87 @@
-from flask import Flask, current_app, jsonify
+from flask import Flask, current_app, jsonify, request
+from datetime import datetime
 
-data = [
+stories = [
     {
-        "id": 0,
-        "title": "Abdul Sharifu Was Buying Milk For A Neighbor's Baby. A Snowstorm Killed Him. ",
-        "url": "https://www.buzzfeednews.com/article/albertsamaha/abdul-sharifu-buffalo-blizzard-2022"
-    },
-    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
         "id": 1,
-        "title": "Amazon Warehouse Worker Daniel Olayiwola Decided To Make A Podcast About Amazon's Working Conditions",
-        "url": "https://www.buzzfeednews.com/article/albertsamaha/daniel-olayiwola-amazon-scamazon-podcast"
+        "score": 42,
+        "title": "Voters Overwhelmingly Back Community Broadband in Chicago and Denver",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.vice.com/en/article/xgzxvz/voters-overwhelmingly-back-community-broadband-in-chicago-and-denver"
     },
     {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
         "id": 2,
-        "title": "Eight People Share What It's Like To Live On $100,000 A Year",
-        "url": "https://www.buzzfeednews.com/article/venessawong/six-figure-salary-100k-a-year"
+        "score": 23,
+        "title": "eBird: A crowdsourced bird sighting database",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://ebird.org/home"
     },
     {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
         "id": 3,
-        "title": "Biden's Student Loan Forgiveness Plan Is Now On Hold. If You Applied, Tell Us What Your Plans Are.",
-        "url": "https://www.buzzfeednews.com/article/venessawong/bidens-student-loan-forgiveness-plan-is-now-on-hold-if-you"
+        "score": 471,
+        "title": "Karen Gillan teams up with Lena Headey and Michelle Yeoh in assassin thriller Gunpowder Milkshake",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.empireonline.com/movies/news/gunpowder-milk-shake-lena-headey-karen-gillan-exclusive/"
     },
     {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
         "id": 4,
-        "title": "How A Group Of Dancers Sparked A Unionization Effort At A Los Angeles Strip Club",
-        "url": "https://www.buzzfeednews.com/article/otilliasteadman/strippers-unionizing-star-garden"
-    }
-]
+        "score": 101,
+        "title": "Pfizers coronavirus vaccine is more than 90 percent effective in first analysis, company reports",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.cnbc.com/2020/11/09/covid-vaccine-pfizer-drug-is-more-than-90percent-effective-in-preventing-infection.html"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 5,
+        "score": 87,
+        "title": "Budget: Pensions to get boost as tax-free limit to rise",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/business-64949083"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 6,
+        "score": 22,
+        "title": "Ukraine war: Zelensky honours unarmed soldier filmed being shot",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/world-europe-64938934"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 7,
+        "score": 313,
+        "title": "Willow Project: US government approves Alaska oil and gas development",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/world-us-canada-64943603"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 8,
+        "score": 2,
+        "title": "SVB and Signature Bank: How bad is US banking crisis and what does it mean?",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/business-64951630"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 9,
+        "score": 131,
+        "title": "Aukus deal: Summit was projection of power and collaborative intent",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/uk-politics-64948535"
+    },
+    {
+        "created_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "id": 10,
+        "score": 41,
+        "title": "Dancer whose barefoot video went viral meets Camilla",
+        "updated_at": "Fri, 24 Jun 2022 17:25:16 GMT",
+        "url": "https://www.bbc.co.uk/news/uk-england-birmingham-64953863"
+    }]
 
 app = Flask(__name__)
 
@@ -36,6 +91,16 @@ def index():
     return current_app.send_static_file("index.html")
 
 
-@app.route("/stories", methods=["GET"])
-def stories():
-    return jsonify(data)
+@app.route("/add", methods=["GET"])
+def addstory():
+    return current_app.send_static_file("./addstory/index.html")
+
+
+@app.route("/scrape", methods=["GET"])
+def scrape():
+    return current_app.send_static_file("./scrape/index.html")
+
+
+@app.route("/stories", methods=["GET", "POST"])
+def get_stories():
+    pass
