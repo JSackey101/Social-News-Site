@@ -35,14 +35,14 @@ function createEditButton(id, url, text) {
   return button
 }
 
-async function handleEdit(id, url, text) {
+async function handleEdit(id, url, title) {
   const newUrl = prompt('Enter new URL', url)
-  const newText = prompt('Enter new text', text)
+  const newTitle = prompt('Enter new Title', title)
 
   const res = await fetch(`http://127.0.0.1:5000/stories/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ url: newUrl, text: newText }),
+    body: JSON.stringify({ url: newUrl, title: newTitle }),
     credentials: 'include'
   })
 
