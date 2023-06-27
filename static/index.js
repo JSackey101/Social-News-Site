@@ -39,21 +39,21 @@ async function handleEdit(id, url, text) {
   const newUrl = prompt('Enter new URL', url)
   const newText = prompt('Enter new text', text)
 
-  const rawRes = await fetch(`http://127.0.0.1:5000/stories/${id}`, {
+  const res = await fetch(`http://127.0.0.1:5000/stories/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: newUrl, text: newText }),
     credentials: 'include'
   })
 
-  if (rawRes.status !== 200) {
-    onError(rawRes)
+  if (res.status !== 200) {
+    onError(res)
   }
 
-  const res = await rawRes.json()
+  const data = await rawRes.json()
 
-  if (res.error) {
-    alert(res.message)
+  if (data.error || data.message) {
+    alert(data.message)
   }
 
   getStories()
@@ -85,6 +85,10 @@ async function getStories() {
   console.log('Data Fetched from Server: ')
   console.log(data)
 
+  if (data.error || data.message) {
+    alert(data.message)
+  }
+
   resetStories()
   displayStories(data)
 }
@@ -111,10 +115,10 @@ async function handleVote(e) {
     onError(rawRes)
   }
 
-  const res = await rawRes.json()
+  const data = await rawRes.json()
 
-  if (res.error) {
-    alert(res.message)
+  if (data.error || data.message) {
+    alert(data.message)
   }
 
   getStories()
@@ -140,7 +144,10 @@ async function handleDelete(e) {
   const res = await rawRes.json()
 
   console.log('Delete Response Received: ')
-  console.log(res)
+
+  if (data.error || data.message) {
+    alert(data.message)
+  }
 
   getStories()
 }
