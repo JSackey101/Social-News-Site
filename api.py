@@ -1,4 +1,5 @@
-from flask import Flask, current_app, jsonify, request
+import psycopg2
+from flask import Flask, current_app, jsonify, request, connection
 from datetime import datetime
 
 stories = [
