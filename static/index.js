@@ -50,7 +50,7 @@ async function handleEdit(id, url, title) {
     onError(res)
   }
 
-  const data = await rawRes.json()
+  const data = await res.json()
 
   if (data.error || data.message) {
     alert(data.message)
