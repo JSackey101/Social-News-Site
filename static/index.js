@@ -141,7 +141,7 @@ async function handleDelete(e) {
     onError(rawRes)
   }
 
-  const res = await rawRes.json()
+  const data = await rawRes.json()
 
   console.log('Delete Response Received: ')
 
