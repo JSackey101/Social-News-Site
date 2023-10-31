@@ -1,3 +1,7 @@
+function getUrl() {
+  return window.location.href
+}
+
 function resetStories() {
   const stories = document.getElementById('stories')
   stories.innerHTML = ''
@@ -39,7 +43,7 @@ async function handleEdit(id, url, title) {
   const newUrl = prompt('Enter new URL', url)
   const newTitle = prompt('Enter new Title', title)
 
-  const res = await fetch(`http://127.0.0.1:5000/stories/${id}`, {
+  const res = await fetch(`${getUrl()}/stories/${id}`, {
     method: 'PATCH',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ url: newUrl, title: newTitle }),
@@ -63,7 +67,7 @@ async function getStories() {
   const searchTerm = document.getElementById('search_input').value
   const sort = document.getElementById('sort').value
   const order = document.getElementById('order').value
-  let url = `http://127.0.0.1:5000/stories?sort=${sort}&order=${order}`
+  let url = `${getUrl()}/stories?sort=${sort}&order=${order}`
 
   if (searchTerm) {
     url += `&search=${searchTerm}`
@@ -104,7 +108,7 @@ async function handleVote(e) {
   const id = elemID[0]
   const direction = elemID[1]
 
-  const rawRes = await fetch(`http://127.0.0.1:5000/stories/${id}/votes`, {
+  const rawRes = await fetch(`${getUrl()}/stories/${id}/votes`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ direction }),
@@ -131,7 +135,7 @@ async function handleDelete(e) {
 
   console.log(`'${direction}' Delete Button Clicked`)
 
-  const rawRes = await fetch(`http://127.0.0.1:5000/stories/${id}`, {
+  const rawRes = await fetch(`${getUrl()}/stories/${id}`, {
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
     credentials: 'include'
