@@ -50,7 +50,7 @@ async function handleEdit(id, url, title) {
     credentials: 'include'
   })
 
-  if (res.status !== 200) {
+  if (res.status >= 300) {
     onError(res)
   }
 
@@ -80,7 +80,7 @@ async function getStories() {
     credentials: 'include'
   })
 
-  if (res.status !== 200) {
+  if (res.status >= 300) {
     onError(res)
   }
 
@@ -115,7 +115,7 @@ async function handleVote(e) {
     credentials: 'include'
   })
 
-  if (rawRes.status !== 200) {
+  if (rawRes.status >= 300) {
     onError(rawRes)
   }
 
@@ -141,7 +141,7 @@ async function handleDelete(e) {
     credentials: 'include'
   })
 
-  if (rawRes.status !== 200) {
+  if (rawRes.status >= 300) {
     onError(rawRes)
   }
 
