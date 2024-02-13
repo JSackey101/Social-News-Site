@@ -21,7 +21,7 @@ window.onload = async function load() {
       }
     })
 
-    if (response.status !== 200) {
+    if (response.status >= 300) {
       onError(response)
     }
 
