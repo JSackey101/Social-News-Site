@@ -1,5 +1,6 @@
 import psycopg2
 from flask import Flask, current_app, jsonify, request
+from storage import save_to_file, load_from_file
 from datetime import datetime
 
 stories = [
