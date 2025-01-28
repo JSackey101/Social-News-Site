@@ -97,9 +97,11 @@ stories = [
 
 app = Flask(__name__)
 
+
 def error_return(message: str) -> dict:
     """ Returns an error dict with the given message. """
     return {"error": True, "message": message}
+
 
 def vote_story(story: dict, direction: str) -> None:
     """ Updates the story based on whether it was up or downvoted. """
@@ -108,15 +110,40 @@ def vote_story(story: dict, direction: str) -> None:
     else:
         story['score'] -= 1
     story['updated_at'] = datetime.now().strftime(
-            "%a, %d %b %Y %H:%M:%S GMT")
+        "%a, %d %b %Y %H:%M:%S GMT")
 
-def search_stories(stories_list: list[dict], search_term: str) -> tuple:
+
+def search_stories(stories_list: list[dict], search_term: str) -> list[dict]:
     """ Searches for stories that have the search term in their title. """
     queried_stories = [story for story in stories_list
-                   if search_term.lower() in story['title'].lower()]
-    if len(queried_stories) > 0:
-        return queried_stories, 200
-    return queried_stories, 404
+                       if search_term.lower() in story['title'].lower()]
+    return queried_stories
+
+
+def sort_stories(stories_list: list[dict], sort_param: str, order_param: str = None) -> list[dict]:
+    """ Sorts stories depending on given sort property and order. 
+        Defaults to ascending order. """
+    reverse_order = False
+    if order_param == 'descending':
+        reverse_order = True
+    if sort_param == 'title':
+        return sorted(stories_list, key=lambda val: val['title'].upper(), reverse=reverse_order)
+    
+    if sort_param == 'score':
+        return sorted(
+            stories_list, key=lambda val: val['score'], reverse=reverse_order)
+    if sort_param == 'created':
+        return sorted(stories_list,
+                      key=lambda val: datetime.strptime(val['created_at'],
+                                                        "%a, %d %b %Y %H:%M:%S GMT"),
+                      reverse=reverse_order)
+    if sort_param == 'modified':
+        return sorted(stories_list,
+                     key=lambda val: datetime.strptime(val['updated_at'],
+                                                       "%a, %d %b %Y %H:%M:%S GMT"),
+                     reverse=reverse_order)
+    return None
+
 
 @app.route("/", methods=["GET"])
 def index():
@@ -141,18 +168,30 @@ def get_stories():
     search = args.get('search')
     sort = args.get('sort')
     order = args.get('order')
+    if sort and sort not in ['title', 'score', 'created', 'modified']:
+        return error_return("Invalid sort property"), 400
+    if order and order not in ['ascending', 'descending']:
+        return error_return("Invalid order property"), 400
     if stories:
+        if search and sort:
+            found_stories = search_stories(stories, search)
+            if len(found_stories) == 0:
+                return found_stories, 404
+            return sort_stories(found_stories, sort, order), 200
+        if sort:
+            return sort_stories(stories, sort, order), 200
         if search:
-            return search_stories(stories, search)
+            return search_stories(stories, search), 200
         return stories, 200
     return error_return("No stories were found"), 404
+
 
 @app.route("/stories/<int:id>/votes", methods=["POST"])
 def add_vote(id: int):
     """ Add vote to story. """
     data = request.get_json()
     print(data.get('direction'))
-    if data.get("direction") == 'up' or data.get("direction") == 'down':
+    if data.get("direction") in ['up', 'down']:
         for story in stories:
             if story['id'] == id:
                 if story['score'] == 0 and data.get("direction") == 'down':
