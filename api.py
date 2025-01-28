@@ -15,7 +15,7 @@ def load_stories() -> list[dict]:
         return data
 
 def write_to_file(stories: list[dict]) -> None:
-    """Given a list of companies, rewrite them to the JSON file."""
+    """Given a list of stories, rewrite them to the JSON file."""
     with open("/Users/jeffsackey/Documents/SigmaLabs/Coursework/Coursework-Backend-Week-1/social_news/stories.json", mode="w", encoding="UTF-8") as f:
         json.dump(stories, f, indent=3)
 
