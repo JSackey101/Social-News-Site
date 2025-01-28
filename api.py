@@ -199,7 +199,7 @@ def create_story(url: str, title: str) -> dict:
 
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
-    """ Returns all of the stories. """
+    """ Returns all of the stories or adds a new story to the list. """
     if request.method == "GET":
         args = request.args.to_dict()
         search = args.get('search')
@@ -248,8 +248,8 @@ def update_story(story: dict, url: str, title: str) -> None:
         story["website"] = url.split("/")[2]
 
 @app.route("/stories/<int:id>", methods=(["PATCH", "DELETE"]))
-def add_new_story_info(id: int):
-    """ Updates existing story of input ID with new info. """
+def update_story_info(id: int):
+    """ Updates existing story of input ID with new info or deletes existing story by ID. """
     if request.method == "PATCH":
         data = request.get_json(silent=True)
         if "url" in data or "title" in data:
