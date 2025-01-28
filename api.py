@@ -97,9 +97,30 @@ stories = [
 
 app = Flask(__name__)
 
+def error_return(message: str) -> dict:
+    """ Returns an error dict with the given message. """
+    return {"error": True, "message": message}
+
+def vote_story(story: dict, direction: str) -> None:
+    """ Updates the story based on whether it was up or downvoted. """
+    if direction == 'up':
+        story['score'] += 1
+    else:
+        story['score'] -= 1
+    story['updated_at'] = datetime.now().strftime(
+            "%a, %d %b %Y %H:%M:%S GMT")
+
+def search_stories(stories_list: list[dict], search_term: str) -> tuple:
+    """ Searches for stories that have the search term in their title. """
+    queried_stories = [story for story in stories_list
+                   if search_term.lower() in story['title'].lower()]
+    if len(queried_stories) > 0:
+        return queried_stories, 200
+    return queried_stories, 404
 
 @app.route("/", methods=["GET"])
 def index():
+    """ Returns the base HTML for the site. """
     return current_app.send_static_file("index.html")
 
 
@@ -115,10 +136,34 @@ def scrape():
 
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
-    pass
+    """ Returns all of the stories. """
+    args = request.args.to_dict()
+    search = args.get('search')
+    sort = args.get('sort')
+    order = args.get('order')
+    if stories:
+        if search:
+            return search_stories(stories, search)
+        return stories, 200
+    return error_return("No stories were found"), 404
+
+@app.route("/stories/<int:id>/votes", methods=["POST"])
+def add_vote(id: int):
+    """ Add vote to story. """
+    data = request.get_json()
+    print(data.get('direction'))
+    if data.get("direction") == 'up' or data.get("direction") == 'down':
+        for story in stories:
+            if story['id'] == id:
+                if story['score'] == 0 and data.get("direction") == 'down':
+                    return error_return("Can't downvote for a story with a score of 0"), 400
+                vote_story(story, data.get('direction'))
+                return {"message": "Updated Successfully"}, 201
+        return error_return("ID not found"), 404
+    return error_return("Bad request."), 400
 
 
 if __name__ == "__main__":
     app.config['TESTING'] = True
     app.config['DEBUG'] = True
-    app.run(debug=True, host="0.0.0.0", port=5000)
+    app.run(debug=True, host="0.0.0.0", port=5001)
