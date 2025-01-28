@@ -200,39 +200,42 @@ def create_story(url: str, title: str) -> dict:
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
     """ Returns all of the stories. """
-    args = request.args.to_dict()
-    data = request.get_json(silent=True)
-    if data:
+    if request.method == "GET":
+        args = request.args.to_dict()
+        search = args.get('search')
+        sort = args.get('sort')
+        order = args.get('order')
+        val_result = validate_sort_order(sort, order)
+        if val_result:
+            return val_result
+        if stories:
+            return search_sort(search, sort, order)
+        return error_return("No stories were found"), 404
+    if request.method == "POST":
+        data = request.get_json(silent=True)
         if "url" in data and "title" in data:
             stories.append(create_story(data['url'], data['title']))
             return {"message": "Added Successfully"}, 201
-        return error_return("Story must have a url and a title."), 400
-    search = args.get('search')
-    sort = args.get('sort')
-    order = args.get('order')
-    val_result = validate_sort_order(sort, order)
-    if val_result:
-        return val_result
-    if stories:
-        return search_sort(search, sort, order)
-    return error_return("No stories were found"), 404
+        return error_return("New story must have a url and a title."), 400
+    return error_return("Invalid Request Method."), 400
 
 
 @app.route("/stories/<int:id>/votes", methods=["POST"])
 def add_vote(id: int):
     """ Add vote to story. """
-    data = request.get_json()
-    print(data.get('direction'))
-    if data.get("direction") in ['up', 'down']:
-        for story in stories:
-            if story['id'] == id:
-                if story['score'] == 0 and data.get("direction") == 'down':
-                    return error_return("Can't downvote for a story with a score of 0"), 400
-                vote_story(story, data.get('direction'))
-                return {"message": "Updated Successfully"}, 201
-        return error_return("ID not found"), 404
-    return error_return("Bad request."), 400
-
+    if request.method == "POST":
+        data = request.get_json()
+        print(data.get('direction'))
+        if data.get("direction") in ['up', 'down']:
+            for story in stories:
+                if story['id'] == id:
+                    if story['score'] == 0 and data.get("direction") == 'down':
+                        return error_return("Can't downvote for a story with a score of 0"), 400
+                    vote_story(story, data.get('direction'))
+                    return {"message": "Updated Successfully"}, 201
+            return error_return("ID not found"), 404
+        return error_return("Direction must be up or down"), 400
+    return error_return("Invalid Request Method."), 400
 
 def update_story(story: dict, url: str, title: str) -> None:
     """ Updates an existing story using the input url/title. """
@@ -244,17 +247,25 @@ def update_story(story: dict, url: str, title: str) -> None:
         story['url'] = url
         story["website"] = url.split("/")[2]
 
-@app.route("/stories/<int:id>", methods=["PATCH"])
+@app.route("/stories/<int:id>", methods=(["PATCH", "DELETE"]))
 def add_new_story_info(id: int):
     """ Updates existing story of input ID with new info. """
-    data = request.get_json(silent=True)
-    if "url" in data or "title" in data:
-        for story in stories:
+    if request.method == "PATCH":
+        data = request.get_json(silent=True)
+        if "url" in data or "title" in data:
+            for story in stories:
+                if story['id'] == id:
+                    update_story(story, data.get('url'), data.get('title'))
+                    return {"message": "Updated Successfully"}, 201
+            return error_return("ID not found"), 404
+        return error_return("Updated story data must contain url or title"), 400
+    if request.method == "DELETE":
+        for i, story in enumerate(stories.copy()):
             if story['id'] == id:
-                update_story(story, data.get('url'), data.get('title'))
-                return {"message": "Updated Successfully"}, 201
+                stories.remove(stories[i])
+                return {"message": "Deleted Successfully"}, 201
         return error_return("ID not found"), 404
-    return error_return("Updated story data must contain url or title"), 400
+    return error_return("Invalid Request Method."), 400
 
 
 
