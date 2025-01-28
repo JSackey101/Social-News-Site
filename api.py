@@ -243,7 +243,6 @@ def update_story(story: dict, url: str, title: str) -> None:
             "%a, %d %b %Y %H:%M:%S GMT")
         story['url'] = url
         story["website"] = url.split("/")[2]
-    return None
 
 @app.route("/stories/<int:id>", methods=["PATCH"])
 def add_new_story_info(id: int):
