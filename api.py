@@ -128,7 +128,6 @@ def sort_stories(stories_list: list[dict], sort_param: str, order_param: str = N
         reverse_order = True
     if sort_param == 'title':
         return sorted(stories_list, key=lambda val: val['title'].upper(), reverse=reverse_order)
-    
     if sort_param == 'score':
         return sorted(
             stories_list, key=lambda val: val['score'], reverse=reverse_order)
@@ -142,6 +141,29 @@ def sort_stories(stories_list: list[dict], sort_param: str, order_param: str = N
                      key=lambda val: datetime.strptime(val['updated_at'],
                                                        "%a, %d %b %Y %H:%M:%S GMT"),
                      reverse=reverse_order)
+    return None
+
+
+def search_sort(search: str, sort: str, order: str) -> tuple:
+    """ Returns a tuple based on the values of search and sort. """
+    if search and sort:
+        found_stories = search_stories(stories, search)
+        if len(found_stories) == 0:
+            return found_stories, 404
+        return sort_stories(found_stories, sort, order), 200
+    if sort:
+        return sort_stories(stories, sort, order), 200
+    if search:
+        return search_stories(stories, search), 200
+    return stories, 200
+
+
+def validate_sort_order(sort: str, order: str):
+    """ Validates that the sort and order values are valid"""
+    if sort and sort not in ['title', 'score', 'created', 'modified']:
+        return error_return("Invalid sort property"), 400
+    if order and order not in ['ascending', 'descending']:
+        return error_return("Invalid order property"), 400
     return None
 
 
@@ -160,29 +182,39 @@ def addstory():
 def scrape():
     return current_app.send_static_file("./scrape/index.html")
 
+def create_story(url: str, title: str) -> dict:
+    """ Creates a new story using the input url and title. """
+    new_story = {
+        "created_at": datetime.now().strftime(
+            "%a, %d %b %Y %H:%M:%S GMT"),
+        "updated_at": datetime.now().strftime(
+            "%a, %d %b %Y %H:%M:%S GMT"),
+        "id": sorted(stories, key=lambda val: val['id'], reverse=True)[0]['id'] + 1,
+        "score": 0,
+        "website": url.split("/")[2],
+        "url": url,
+        "title": title
+    }
+    return new_story
 
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
     """ Returns all of the stories. """
     args = request.args.to_dict()
+    content = request.get_json(silent=True)
+    if content:
+        if "url" in content and "title" in content:
+            stories.append(create_story(content['url'], content['title']))
+            return {"message": "Added Successfully"}, 201
+        return error_return("Story must have a url and a title."), 404
     search = args.get('search')
     sort = args.get('sort')
     order = args.get('order')
-    if sort and sort not in ['title', 'score', 'created', 'modified']:
-        return error_return("Invalid sort property"), 400
-    if order and order not in ['ascending', 'descending']:
-        return error_return("Invalid order property"), 400
+    val_result = validate_sort_order(sort, order)
+    if val_result:
+        return val_result
     if stories:
-        if search and sort:
-            found_stories = search_stories(stories, search)
-            if len(found_stories) == 0:
-                return found_stories, 404
-            return sort_stories(found_stories, sort, order), 200
-        if sort:
-            return sort_stories(stories, sort, order), 200
-        if search:
-            return search_stories(stories, search), 200
-        return stories, 200
+        return search_sort(search, sort, order)
     return error_return("No stories were found"), 404
 
 
@@ -205,4 +237,4 @@ def add_vote(id: int):
 if __name__ == "__main__":
     app.config['TESTING'] = True
     app.config['DEBUG'] = True
-    app.run(debug=True, host="0.0.0.0", port=5001)
+    app.run(debug=True, host="0.0.0.0", port=5002)
