@@ -201,12 +201,12 @@ def create_story(url: str, title: str) -> dict:
 def get_stories():
     """ Returns all of the stories. """
     args = request.args.to_dict()
-    content = request.get_json(silent=True)
-    if content:
-        if "url" in content and "title" in content:
-            stories.append(create_story(content['url'], content['title']))
+    data = request.get_json(silent=True)
+    if data:
+        if "url" in data and "title" in data:
+            stories.append(create_story(data['url'], data['title']))
             return {"message": "Added Successfully"}, 201
-        return error_return("Story must have a url and a title."), 404
+        return error_return("Story must have a url and a title."), 400
     search = args.get('search')
     sort = args.get('sort')
     order = args.get('order')
@@ -232,6 +232,32 @@ def add_vote(id: int):
                 return {"message": "Updated Successfully"}, 201
         return error_return("ID not found"), 404
     return error_return("Bad request."), 400
+
+
+def update_story(story: dict, url: str, title: str) -> None:
+    """ Updates an existing story using the input url/title. """
+    if title:
+        story['title'] = title
+    if url:
+        story['updated_at'] = datetime.now().strftime(
+            "%a, %d %b %Y %H:%M:%S GMT")
+        story['url'] = url
+        story["website"] = url.split("/")[2]
+    return None
+
+@app.route("/stories/<int:id>", methods=["PATCH"])
+def add_new_story_info(id: int):
+    """ Updates existing story of input ID with new info. """
+    data = request.get_json(silent=True)
+    if "url" in data or "title" in data:
+        for story in stories:
+            if story['id'] == id:
+                update_story(story, data.get('url'), data.get('title'))
+                return {"message": "Updated Successfully"}, 201
+        return error_return("ID not found"), 404
+    return error_return("Updated story data must contain url or title"), 400
+
+
 
 
 if __name__ == "__main__":
