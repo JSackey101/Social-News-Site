@@ -1,8 +1,10 @@
+""" An API for displaying news stories. """
+
 import json
 import os
-from flask import Flask, current_app, jsonify, request
-from storage import save_to_file, load_from_file
 from datetime import datetime
+from flask import Flask, current_app, request
+#from storage import save_to_file, load_from_file
 
 
 
@@ -90,20 +92,16 @@ def validate_sort_order(sort: str, order: str):
     return None
 
 
-@app.route("/", methods=["GET"])
-def index():
-    """ Returns the base HTML for the site. """
-    return current_app.send_static_file("index.html")
+def update_story(story: dict, url: str, title: str) -> None:
+    """ Updates an existing story using the input url/title. """
+    if title:
+        story['title'] = title
+    if url:
+        story['updated_at'] = datetime.now().strftime(
+            "%a, %d %b %Y %H:%M:%S GMT")
+        story['url'] = url
+        story["website"] = url.split("/")[2]
 
-
-@app.route("/add", methods=["GET"])
-def addstory():
-    return current_app.send_static_file("./addstory/index.html")
-
-
-@app.route("/scrape", methods=["GET"])
-def scrape():
-    return current_app.send_static_file("./scrape/index.html")
 
 def create_story(stories: list[dict], url: str, title: str) -> dict:
     """ Creates a new story using the input url and title. """
@@ -119,6 +117,23 @@ def create_story(stories: list[dict], url: str, title: str) -> dict:
         "title": title
     }
     return new_story
+
+@app.route("/", methods=["GET"])
+def index():
+    """ Returns the base HTML for the site. """
+    return current_app.send_static_file("index.html")
+
+
+@app.route("/add", methods=["GET"])
+def addstory():
+    """ Returns the HTML for adding a story. """
+    return current_app.send_static_file("./addstory/index.html")
+
+
+@app.route("/scrape", methods=["GET"])
+def scrape():
+    """ Returns the HTML for scraping stories. """
+    return current_app.send_static_file("./scrape/index.html")
 
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
@@ -146,7 +161,7 @@ def get_stories():
 
 
 @app.route("/stories/<int:id>/votes", methods=["POST"])
-def add_vote(id: int):
+def add_vote(s_id: int):
     """ Add vote to story. """
     stories = load_stories()
     if request.method == "POST":
@@ -154,7 +169,7 @@ def add_vote(id: int):
         print(data.get('direction'))
         if data.get("direction") in ['up', 'down']:
             for story in stories:
-                if story['id'] == id:
+                if story['id'] == s_id:
                     if story['score'] == 0 and data.get("direction") == 'down':
                         return error_return("Can't downvote for a story with a score of 0"), 400
                     vote_story(story, data.get('direction'))
@@ -164,25 +179,15 @@ def add_vote(id: int):
         return error_return("Direction must be up or down"), 400
     return error_return("Invalid Request Method."), 400
 
-def update_story(story: dict, url: str, title: str) -> None:
-    """ Updates an existing story using the input url/title. """
-    if title:
-        story['title'] = title
-    if url:
-        story['updated_at'] = datetime.now().strftime(
-            "%a, %d %b %Y %H:%M:%S GMT")
-        story['url'] = url
-        story["website"] = url.split("/")[2]
-
 @app.route("/stories/<int:id>", methods=(["PATCH", "DELETE"]))
-def update_story_info(id: int):
+def update_story_info(s_id: int):
     """ Updates existing story of input ID with new info or deletes existing story by ID. """
     stories = load_stories()
     if request.method == "PATCH":
         data = request.get_json(silent=True)
         if "url" in data or "title" in data:
             for story in stories:
-                if story['id'] == id:
+                if story['id'] == s_id:
                     update_story(story, data.get('url'), data.get('title'))
                     write_to_file(stories)
                     return {"message": "Updated Successfully"}, 201
@@ -190,7 +195,7 @@ def update_story_info(id: int):
         return error_return("Updated story data must contain url or title"), 400
     if request.method == "DELETE":
         for i, story in enumerate(stories.copy()):
-            if story['id'] == id:
+            if story['id'] == s_id:
                 stories.remove(stories[i])
                 write_to_file(stories)
                 return {"message": "Deleted Successfully"}, 201
