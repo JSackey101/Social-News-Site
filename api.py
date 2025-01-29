@@ -1,4 +1,5 @@
 import json
+import os
 from flask import Flask, current_app, jsonify, request
 from storage import save_to_file, load_from_file
 from datetime import datetime
@@ -6,17 +7,18 @@ from datetime import datetime
 
 
 app = Flask(__name__)
+abs_path = os.path.dirname(os.path.abspath(__file__))
 
 
 def load_stories() -> list[dict]:
     """From the JSON file, load all the stories into a python list."""
-    with open("/Users/jeffsackey/Documents/SigmaLabs/Coursework/Coursework-Backend-Week-1/social_news/stories.json", encoding="UTF-8") as file:
+    with open(os.path.join(abs_path, "stories.json"), encoding="UTF-8") as file:
         data = json.load(file)
         return data
 
 def write_to_file(stories: list[dict]) -> None:
     """Given a list of stories, rewrite them to the JSON file."""
-    with open("/Users/jeffsackey/Documents/SigmaLabs/Coursework/Coursework-Backend-Week-1/social_news/stories.json", mode="w", encoding="UTF-8") as f:
+    with open(os.path.join(abs_path, "stories.json"), mode="w", encoding="UTF-8") as f:
         json.dump(stories, f, indent=3)
 
 def error_return(message: str) -> dict:
@@ -201,4 +203,4 @@ def update_story_info(id: int):
 if __name__ == "__main__":
     app.config['TESTING'] = True
     app.config['DEBUG'] = True
-    app.run(debug=True, host="0.0.0.0", port=5002)
+    app.run(debug=True, host="0.0.0.0", port=8000)
