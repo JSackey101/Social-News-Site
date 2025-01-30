@@ -157,33 +157,29 @@ def get_stories():
         if stories:
             return HelpApp.search_sort(stories, search, sort, order)
         return HelpApp.error_return("No stories were found"), 404
-    if request.method == "POST":
-        data = request.get_json(silent=True)
-        if "url" in data and "title" in data:
-            stories.append(HelpApp.create_story(stories, data['url'], data['title']))
-            HelpApp.write_to_file(stories)
-            return {"message": "Added Successfully"}, 201
-        return HelpApp.error_return("New story must have a url and a title."), 400
-    return HelpApp.error_return("Invalid Request Method."), 405
+    data = request.get_json(silent=True)
+    if "url" in data and "title" in data:
+        stories.append(HelpApp.create_story(stories, data['url'], data['title']))
+        HelpApp.write_to_file(stories)
+        return {"message": "Added Successfully"}, 201
+    return HelpApp.error_return("New story must have a url and a title."), 400
 
 
 @app.route("/stories/<int:s_id>/votes", methods=["POST"])
 def add_vote(s_id: int):
     """ Add vote to story. """
     stories = HelpApp.load_stories()
-    if request.method == "POST":
-        data = request.get_json()
-        if data.get("direction") in ['up', 'down']:
-            for story in stories:
-                if story['id'] == s_id:
-                    if story['score'] == 0 and data.get("direction") == 'down':
-                        return HelpApp.error_return("Can't downvote for a story with 0 votes"), 400
-                    HelpApp.vote_story(story, data.get('direction'))
-                    HelpApp.write_to_file(stories)
-                    return {"message": "Updated Successfully"}, 201
-            return HelpApp.error_return("ID not found"), 404
-        return HelpApp.error_return("Direction must be up or down"), 400
-    return HelpApp.error_return("Invalid Request Method."), 405
+    data = request.get_json()
+    if data.get("direction") in ['up', 'down']:
+        for story in stories:
+            if story['id'] == s_id:
+                if story['score'] == 0 and data.get("direction") == 'down':
+                    return HelpApp.error_return("Can't downvote for a story with 0 votes"), 400
+                HelpApp.vote_story(story, data.get('direction'))
+                HelpApp.write_to_file(stories)
+                return {"message": "Updated Successfully"}, 201
+        return HelpApp.error_return("ID not found"), 404
+    return HelpApp.error_return("Direction must be up or down"), 400
 
 @app.route("/stories/<int:s_id>", methods=(["PATCH", "DELETE"]))
 def update_story_info(s_id: int):
@@ -200,14 +196,12 @@ def update_story_info(s_id: int):
                     return {"message": "Updated Successfully"}, 201
             return HelpApp.error_return("ID not found"), 404
         return HelpApp.error_return("Updated story data must contain url or title"), 400
-    if request.method == "DELETE":
-        for i, story in enumerate(stories.copy()):
-            if story['id'] == s_id:
-                stories.remove(stories[i])
-                HelpApp.write_to_file(stories)
-                return {"message": "Deleted Successfully"}, 201
-        return HelpApp.error_return("ID not found"), 404
-    return HelpApp.error_return("Invalid Request Method."), 405
+    for i, story in enumerate(stories.copy()):
+        if story['id'] == s_id:
+            stories.remove(stories[i])
+            HelpApp.write_to_file(stories)
+            return {"message": "Deleted Successfully"}, 201
+    return HelpApp.error_return("ID not found"), 404
 
 
 
