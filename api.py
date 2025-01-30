@@ -4,7 +4,6 @@ import json
 import os
 from datetime import datetime
 from flask import Flask, current_app, request
-#from storage import save_to_file, load_from_file
 
 
 
@@ -91,7 +90,7 @@ class HelpApp():
         return stories, 200
 
     @staticmethod
-    def validate_sort_order(sort: str, order: str):
+    def validate_sort_order(sort: str, order: str) -> tuple:
         """ Validates that the sort and order values are valid"""
         if sort and sort not in ['title', 'score', 'created', 'modified']:
             return HelpApp.error_return("Invalid sort property"), 400
@@ -165,7 +164,7 @@ def get_stories():
             HelpApp.write_to_file(stories)
             return {"message": "Added Successfully"}, 201
         return HelpApp.error_return("New story must have a url and a title."), 400
-    return HelpApp.error_return("Invalid Request Method."), 400
+    return HelpApp.error_return("Invalid Request Method."), 405
 
 
 @app.route("/stories/<int:s_id>/votes", methods=["POST"])
@@ -174,18 +173,17 @@ def add_vote(s_id: int):
     stories = HelpApp.load_stories()
     if request.method == "POST":
         data = request.get_json()
-        print(data.get('direction'))
         if data.get("direction") in ['up', 'down']:
             for story in stories:
                 if story['id'] == s_id:
                     if story['score'] == 0 and data.get("direction") == 'down':
-                        return HelpApp.error_return("Can't downvote for a story with a score of 0"), 400
+                        return HelpApp.error_return("Can't downvote for a story with 0 votes"), 400
                     HelpApp.vote_story(story, data.get('direction'))
                     HelpApp.write_to_file(stories)
                     return {"message": "Updated Successfully"}, 201
             return HelpApp.error_return("ID not found"), 404
         return HelpApp.error_return("Direction must be up or down"), 400
-    return HelpApp.error_return("Invalid Request Method."), 400
+    return HelpApp.error_return("Invalid Request Method."), 405
 
 @app.route("/stories/<int:s_id>", methods=(["PATCH", "DELETE"]))
 def update_story_info(s_id: int):
@@ -209,7 +207,7 @@ def update_story_info(s_id: int):
                 HelpApp.write_to_file(stories)
                 return {"message": "Deleted Successfully"}, 201
         return HelpApp.error_return("ID not found"), 404
-    return HelpApp.error_return("Invalid Request Method."), 400
+    return HelpApp.error_return("Invalid Request Method."), 405
 
 
 
