@@ -4,6 +4,7 @@ import json
 import os
 from datetime import datetime
 from flask import Flask, current_app, request
+from news_scraper import get_html, parse_stories_bs
 
 
 
@@ -112,12 +113,17 @@ class HelpApp():
     @staticmethod
     def create_story(stories: list[dict], url: str, title: str) -> dict:
         """ Creates a new story using the input url and title. """
+        if stories:
+            new_id = sorted(stories, key=lambda val: val['id'], reverse=True)[
+                0]['id'] + 1
+        else:
+            new_id = 0
         new_story = {
             "created_at": datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT"),
             "updated_at": datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT"),
-            "id": sorted(stories, key=lambda val: val['id'], reverse=True)[0]['id'] + 1,
+            "id": new_id,
             "score": 0,
             "website": url.split("/")[2],
             "url": url,
@@ -204,6 +210,23 @@ def update_story_info(s_id: int):
     return HelpApp.error_return("ID not found"), 404
 
 
+@app.route("/scrape", methods=["POST"])
+def scrape_story_info():
+    """ Scrapes story information from BBC and adds this to the site. """
+    stories = HelpApp.load_stories()
+    data = request.get_json(silent=True)
+    if "url" in data:
+        if data['url'] != "http://bbc.co.uk":
+            return HelpApp.error_return("Must be a BBC URL"), 400
+        bbc_html_doc = get_html(data['url'])
+        titleurl_list = parse_stories_bs(domain_url=data['url'], html=bbc_html_doc)
+        if not titleurl_list:
+            return HelpApp.error_return("No stories found."), 404
+        for story in titleurl_list:
+            stories.append(HelpApp.create_story(stories, story["url"], story['title']))
+        HelpApp.write_to_file(stories)
+        return {"message": "BBC Scraped Successfully"}, 201
+    return HelpApp.error_return("Must be a url"), 400
 
 
 if __name__ == "__main__":

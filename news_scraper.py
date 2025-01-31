@@ -1,5 +1,6 @@
+""" Contains functions to scrape news from a website. """
+
 from urllib.request import urlopen
-from datetime import datetime
 from bs4 import BeautifulSoup
 
 
@@ -28,6 +29,6 @@ def parse_stories_bs(domain_url, html):
 
 if __name__ == "__main__":
     BBC_URL = "http://bbc.co.uk"
-    bbc_html_doc = get_html(bbc_url)
-    parse_stories_bs(domain_url=bbc_url, html=bbc_html_doc)
-    
+    bbc_html_doc = get_html(BBC_URL)
+    parse_stories_bs(domain_url=BBC_URL, html=bbc_html_doc)
+
