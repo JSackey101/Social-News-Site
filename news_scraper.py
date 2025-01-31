@@ -6,7 +6,8 @@ from bs4 import BeautifulSoup
 
 def get_html(url):
     """ Get HTML from a URL. """
-    page = urlopen(url)
+    with urlopen(url) as urlpage:
+        page = urlpage
     html_bytes = page.read()
     html_doc = html_bytes.decode("utf_8")
     return html_doc
@@ -31,4 +32,3 @@ if __name__ == "__main__":
     BBC_URL = "http://bbc.co.uk"
     bbc_html_doc = get_html(BBC_URL)
     parse_stories_bs(domain_url=BBC_URL, html=bbc_html_doc)
-

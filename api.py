@@ -52,7 +52,7 @@ class HelpApp():
         return queried_stories
 
     @staticmethod
-    def sort_stories(stories_list: list[dict], 
+    def sort_stories(stories_list: list[dict],
                      sort_param: str, order_param: str = None) -> list[dict]:
         """ Sorts stories depending on given sort property and order. 
             Defaults to ascending order. """
