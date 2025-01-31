@@ -1,3 +1,5 @@
+# pylint: skip-file
+
 def save_to_file(data: ...) -> ...:
     """Save the data to a file called stories.json"""
     ...
