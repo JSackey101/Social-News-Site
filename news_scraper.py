@@ -1,17 +1,19 @@
 """ Contains functions to scrape news from a website. """
 
 from urllib.request import urlopen
+from requests import HTTPError
 from bs4 import BeautifulSoup
 
 
 def get_html(url):
     """ Get HTML from a URL. """
-    with urlopen(url) as urlpage:
-        page = urlpage
-        html_bytes = page.read()
-        html_doc = html_bytes.decode("utf_8")
-    return html_doc
-
+    if "http://" in url or "https://" in url:
+        with urlopen(url) as urlpage:
+            page = urlpage
+            html_bytes = page.read()
+            html_doc = html_bytes.decode("utf_8")
+        return html_doc
+    raise HTTPError(" Invalid Link. ")
 
 def parse_stories_bs(domain_url, html):
     """ Create a list of story dictionaries containing title and url for input HTML. """
@@ -20,9 +22,13 @@ def parse_stories_bs(domain_url, html):
     stories = soup.css.select(".e1vyq2e80")
     story_list = []
     for story in stories:
+        # Skips over BBC Videos and the Country News Pages. 
+        if story.find('span', class_="visually-hidden ssrcss-1f39n02-VisuallyHidden e16en2lz0"
+                      ) is not None or len(str(story.find('p')).split(" ")) < 5:
+            continue
         story_dict = {}
-        story_dict['title'] = str(story.find('p'))[
-            75:].split('<', maxsplit=1)[0]
+        story_dict['title'] = str(story.find(
+            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah96")).split(">")[2].split("<")[0]
         story_dict['url'] = domain_url + str(story.find("a")['href'])
         story_list.append(story_dict)
     return story_list
