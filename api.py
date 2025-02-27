@@ -1,12 +1,10 @@
 """ An API for displaying news stories. """
 
-import json
-import os
 from datetime import datetime
 from flask import Flask, current_app, request
 from news_scraper import get_html, parse_stories_bs
 from storage import load_from_file, save_to_file
-
+from requests import HTTPError
 
 
 app = Flask(__name__)
@@ -199,18 +197,22 @@ def update_story_info(s_id: int):
 @app.route("/scrape", methods=["POST"])
 def scrape_story_info():
     """ Scrapes story information from BBC and adds this to the site. """
-    stories = HelpApp.load_stories()
+    stories = load_from_file()
     data = request.get_json(silent=True)
     if "url" in data:
-        if data['url'] != "http://bbc.co.uk":
+        if "bbc.co.uk" not in data['url']:
             return HelpApp.error_return("Must be a BBC URL"), 400
-        bbc_html_doc = get_html(data['url'])
+        try:
+            bbc_html_doc = get_html(data['url'])
+        except HTTPError:
+            return HelpApp.error_return("""URL must start with http://
+                                         or https:// and be a valid url. """), 400
         titleurl_list = parse_stories_bs(domain_url=data['url'], html=bbc_html_doc)
         if not titleurl_list:
             return HelpApp.error_return("No stories found."), 404
         for story in titleurl_list:
             stories.append(HelpApp.create_story(stories, story["url"], story['title']))
-        HelpApp.write_to_file(stories)
+        save_to_file(stories)
         return {"message": "BBC Scraped Successfully"}, 201
     return HelpApp.error_return("Must be a url"), 400
 
