@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from flask import Flask, current_app, request
 from news_scraper import get_html, parse_stories_bs
+from storage import load_from_file, save_to_file
 
 
 
@@ -13,21 +14,6 @@ app = Flask(__name__)
 
 class HelpApp():
     """ A class containing helper methods for the API. """
-
-    ABS_PATH = os.path.dirname(os.path.abspath(__file__))
-
-    @staticmethod
-    def load_stories() -> list[dict]:
-        """From the JSON file, load all the stories into a python list."""
-        with open(os.path.join(HelpApp.ABS_PATH, "stories.json"), encoding="UTF-8") as file:
-            data = json.load(file)
-            return data
-
-    @staticmethod
-    def write_to_file(stories: list[dict]) -> None:
-        """Given a list of stories, rewrite them to the JSON file."""
-        with open(os.path.join(HelpApp.ABS_PATH, "stories.json"), mode="w", encoding="UTF-8") as f:
-            json.dump(stories, f, indent=3)
 
     @staticmethod
     def error_return(message: str) -> dict:
@@ -151,7 +137,7 @@ def scrape():
 @app.route("/stories", methods=["GET", "POST"])
 def get_stories():
     """ Returns all of the stories or adds a new story to the list. """
-    stories = HelpApp.load_stories()
+    stories = load_from_file()
     if request.method == "GET":
         args = request.args.to_dict()
         search = args.get('search')
@@ -166,7 +152,7 @@ def get_stories():
     data = request.get_json(silent=True)
     if "url" in data and "title" in data:
         stories.append(HelpApp.create_story(stories, data['url'], data['title']))
-        HelpApp.write_to_file(stories)
+        save_to_file(stories)
         return {"message": "Added Successfully"}, 201
     return HelpApp.error_return("New story must have a url and a title."), 400
 
@@ -174,7 +160,7 @@ def get_stories():
 @app.route("/stories/<int:s_id>/votes", methods=["POST"])
 def add_vote(s_id: int):
     """ Add vote to story. """
-    stories = HelpApp.load_stories()
+    stories = load_from_file()
     data = request.get_json()
     if data.get("direction") in ['up', 'down']:
         for story in stories:
@@ -182,7 +168,7 @@ def add_vote(s_id: int):
                 if story['score'] == 0 and data.get("direction") == 'down':
                     return HelpApp.error_return("Can't downvote for a story with 0 votes"), 400
                 HelpApp.vote_story(story, data.get('direction'))
-                HelpApp.write_to_file(stories)
+                save_to_file(stories)
                 return {"message": "Updated Successfully"}, 201
         return HelpApp.error_return("ID not found"), 404
     return HelpApp.error_return("Direction must be up or down"), 400
@@ -190,7 +176,7 @@ def add_vote(s_id: int):
 @app.route("/stories/<int:s_id>", methods=(["PATCH", "DELETE"]))
 def update_story_info(s_id: int):
     """ Updates existing story of input ID with new info or deletes existing story by ID. """
-    stories = HelpApp.load_stories()
+    stories = load_from_file()
     if request.method == "PATCH":
         data = request.get_json(silent=True)
         if "url" in data or "title" in data:
@@ -198,14 +184,14 @@ def update_story_info(s_id: int):
                 if story['id'] == s_id:
                     HelpApp.update_story(
                         story, data.get('url'), data.get('title'))
-                    HelpApp.write_to_file(stories)
+                    save_to_file(stories)
                     return {"message": "Updated Successfully"}, 201
             return HelpApp.error_return("ID not found"), 404
         return HelpApp.error_return("Updated story data must contain url or title"), 400
     for i, story in enumerate(stories.copy()):
         if story['id'] == s_id:
             stories.remove(stories[i])
-            HelpApp.write_to_file(stories)
+            save_to_file(stories)
             return {"message": "Deleted Successfully"}, 201
     return HelpApp.error_return("ID not found"), 404
 
