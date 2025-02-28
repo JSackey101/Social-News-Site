@@ -86,13 +86,14 @@ class HelpApp():
     @staticmethod
     def update_story(story: dict, url: str, title: str) -> None:
         """ Updates an existing story using the input url/title. """
-        if title:
-            story['title'] = title
-        if url:
+        if title or url:
             story['updated_at'] = datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT")
-            story['url'] = url
-            story["website"] = url.split("/")[2]
+            if title:
+                story['title'] = title
+            if url:
+                story['url'] = url
+                story["website"] = url.split("/")[2]
 
     @staticmethod
     def create_story(stories: list[dict], url: str, title: str) -> dict:
