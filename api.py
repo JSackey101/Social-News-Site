@@ -211,7 +211,8 @@ def scrape_story_info():
         if not titleurl_list:
             return HelpApp.error_return("No stories found."), 404
         for story in titleurl_list:
-            stories.append(HelpApp.create_story(stories, story["url"], story['title']))
+            if story['url'] not in [story['url'] for story in stories]:
+                stories.append(HelpApp.create_story(stories, story["url"], story['title']))
         save_to_file(stories)
         return {"message": "BBC Scraped Successfully"}, 201
     return HelpApp.error_return("Must be a url"), 400
