@@ -7,13 +7,14 @@ from bs4 import BeautifulSoup
 
 def get_html(url):
     """ Get HTML from a URL. """
-    if "http://" in url or "https://" in url:
+    try:
         with urlopen(url) as urlpage:
             page = urlpage
             html_bytes = page.read()
             html_doc = html_bytes.decode("utf_8")
-        return html_doc
-    raise HTTPError("Invalid Link. ")
+    except ValueError as err:
+        raise HTTPError("Invalid Link. ") from err
+    return html_doc
 
 def parse_stories_bs(domain_url, html):
     """ Create a list of story dictionaries containing title and url for input HTML. """
