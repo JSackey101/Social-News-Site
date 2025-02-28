@@ -197,17 +197,16 @@ def update_story_info(s_id: int):
 
 @app.route("/scrape", methods=["POST"])
 def scrape_story_info():
-    """ Scrapes story information from BBC and adds this to the site. """
+    """ Scrapes story information from a given link and adds this to the site. 
+        Currently only works for the BBC site. """
     stories = load_from_file()
     data = request.get_json(silent=True)
     if "url" in data:
-        if "bbc.co.uk" not in data['url']:
-            return HelpApp.error_return("Must be a BBC URL"), 400
         try:
             bbc_html_doc = get_html(data['url'])
         except HTTPError:
-            return HelpApp.error_return("""URL must start with http://
-                                         or https:// and be a valid url. """), 400
+            return HelpApp.error_return(
+                "URL must be a valid url. "), 400
         titleurl_list = parse_stories_bs(domain_url=data['url'], html=bbc_html_doc)
         if not titleurl_list:
             return HelpApp.error_return("No stories found."), 404
@@ -216,7 +215,7 @@ def scrape_story_info():
                 stories.append(HelpApp.create_story(stories, story["url"], story['title']))
         save_to_file(stories)
         return {"message": "BBC Scraped Successfully"}, 201
-    return HelpApp.error_return("Must be a url"), 400
+    return HelpApp.error_return("There must be a url header. "), 400
 
 
 if __name__ == "__main__":
