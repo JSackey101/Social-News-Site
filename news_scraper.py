@@ -13,7 +13,7 @@ def get_html(url):
             html_bytes = page.read()
             html_doc = html_bytes.decode("utf_8")
         return html_doc
-    raise HTTPError(" Invalid Link. ")
+    raise HTTPError("Invalid Link. ")
 
 def parse_stories_bs(domain_url, html):
     """ Create a list of story dictionaries containing title and url for input HTML. """
@@ -22,7 +22,7 @@ def parse_stories_bs(domain_url, html):
     stories_list = soup.css.select(".e1vyq2e80")
     story_list = []
     for story in stories_list:
-        # Skips over BBC Videos and the Country News Pages. 
+        # Skips over BBC Videos and the Country News Pages.
         if story.find('span', class_="visually-hidden ssrcss-1f39n02-VisuallyHidden e16en2lz0"
                       ) is not None or len(str(story.find('p')).split(" ")) < 5:
             continue
