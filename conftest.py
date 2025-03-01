@@ -233,3 +233,37 @@ def test_updated_at_ascending_stories():
             "website": "empireonline.com"
         }
     ]
+
+@pytest.fixture
+def test_html_bytes():
+    return b'Hello World!'
+
+@pytest.fixture
+def test_video_html():
+    return """<div class="e1vyq2e80">
+<span class="visually-hidden ssrcss-1f39n02-VisuallyHidden e16en2lz0">Video: How AI is Changing the Future</span>
+<a href="/news/technology-10101">Watch the video</a>
+</div>"""
+
+@pytest.fixture
+def test_normal_story_A():
+    return """<div class="e1vyq2e80">
+<p class="ssrcss-1b1mki6-PromoHeadline exn3ah96"><span aria-hidden="false">Breaking News: New Developments in the Tech Industry</span></p>
+<a href="/news/technology-12345">Read more</a>
+</div>"""
+
+@pytest.fixture
+def test_language_html():
+    return """<div class="e1vyq2e80">
+<p class="ssrcss-1b1mki6-PromoHeadline exn3ah96"><span aria-hidden="false">Wales</span></p>
+<a href="/wales"></a>
+</div>"""
+
+
+@pytest.fixture
+def test_normal_story_B():
+    return """<div class="e1vyq2e80">
+<p class="ssrcss-1b1mki6-PromoHeadline exn3ah96"><span aria-hidden="false">Global Warming: The Impact on Our Oceans</span></p>
+<a href="/news/environment-67890">Read more</a>
+</div>
+"""

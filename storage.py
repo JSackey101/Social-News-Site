@@ -7,7 +7,7 @@ ABS_PATH = os.path.dirname(os.path.abspath(__file__))
 
 def save_to_file(data: list[dict]) -> None:
     """ Save the data to a file called stories.json. """
-    with open(os.path.join(ABS_PATH, data), mode="w", encoding="UTF-8") as f:
+    with open(os.path.join(ABS_PATH, "stories.json"), mode="w", encoding="UTF-8") as f:
         json.dump(data, f, indent=3)
 
 

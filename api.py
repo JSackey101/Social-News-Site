@@ -1,11 +1,10 @@
 """ An API for displaying news stories. """
 
-import json
-import os
 from datetime import datetime
 from flask import Flask, current_app, request
+from news_scraper import get_html, parse_stories_bs
 from storage import load_from_file, save_to_file
-
+from requests import HTTPError
 
 
 app = Flask(__name__)
@@ -37,7 +36,7 @@ class HelpApp():
         return queried_stories
 
     @staticmethod
-    def sort_stories(stories_list: list[dict], 
+    def sort_stories(stories_list: list[dict],
                      sort_param: str, order_param: str = None) -> list[dict]:
         """ Sorts stories depending on given sort property and order. 
             Defaults to ascending order. """
@@ -87,23 +86,29 @@ class HelpApp():
     @staticmethod
     def update_story(story: dict, url: str, title: str) -> None:
         """ Updates an existing story using the input url/title. """
-        if title:
-            story['title'] = title
-        if url:
+        if title or url:
             story['updated_at'] = datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT")
-            story['url'] = url
-            story["website"] = url.split("/")[2]
+            if title:
+                story['title'] = title
+            if url:
+                story['url'] = url
+                story["website"] = url.split("/")[2]
 
     @staticmethod
     def create_story(stories: list[dict], url: str, title: str) -> dict:
         """ Creates a new story using the input url and title. """
+        if stories:
+            new_id = sorted(stories, key=lambda val: val['id'], reverse=True)[
+                0]['id'] + 1
+        else:
+            new_id = 0
         new_story = {
             "created_at": datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT"),
             "updated_at": datetime.now().strftime(
                 "%a, %d %b %Y %H:%M:%S GMT"),
-            "id": sorted(stories, key=lambda val: val['id'], reverse=True)[0]['id'] + 1,
+            "id": new_id,
             "score": 0,
             "website": url.split("/")[2],
             "url": url,
@@ -190,6 +195,27 @@ def update_story_info(s_id: int):
     return HelpApp.error_return("ID not found"), 404
 
 
+@app.route("/scrape", methods=["POST"])
+def scrape_story_info():
+    """ Scrapes story information from a given link and adds this to the site. 
+        Currently only works for the BBC site. """
+    stories = load_from_file()
+    data = request.get_json(silent=True)
+    if "url" in data:
+        try:
+            bbc_html_doc = get_html(data['url'])
+        except HTTPError:
+            return HelpApp.error_return(
+                "URL must be a valid url. "), 400
+        titleurl_list = parse_stories_bs(domain_url=data['url'], html=bbc_html_doc)
+        if not titleurl_list:
+            return HelpApp.error_return("No stories found."), 404
+        for story in titleurl_list:
+            if story['url'] not in [story['url'] for story in stories]:
+                stories.append(HelpApp.create_story(stories, story["url"], story['title']))
+        save_to_file(stories)
+        return {"message": "BBC Scraped Successfully"}, 201
+    return HelpApp.error_return("There must be a url header. "), 400
 
 
 if __name__ == "__main__":

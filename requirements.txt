@@ -2,4 +2,5 @@ flask
 psycopg2-binary
 flask-cors
 pytest
-pylint
+bs4
+requests
