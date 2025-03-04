@@ -24,121 +24,121 @@ Change the port from 8000 (Default) to whatever works for your device.
 
 ## Endpoints
 
-### / - Methods: GET
+### ```/ ``` ```(Methods: GET)```
 
 Default endpoint. Returns the base HTML for the site.
 
-### /add - Methods: GET
+### ```/add``` ```(Methods: GET)```
 
 #### Methods
 
-- GET
+```GET```
 
 Returns the HTML for adding an article to the site.
 
-### /stories - Methods: GET, POST, Queries: search, sort, order
+### ```/stories```  ```(Methods: GET, POST, Queries: search, sort, order)```
 
 #### Methods
 
-- GET
+```GET```
 
 Returns article data depending on the queries given.
 
-- POST
+```POST```
 
 Adds a new article to the list. 
 
 Request Body:
 
-- 'url' header - containing a link to the source of the article.
-- 'title' header - containing the title of the news article.
+- ```'url'``` header - containing a link to the source of the article.
+- ```'title'``` header - containing the title of the news article.
 
 #### Queries
 
-- search
+```search```
 
 Filters the articles returned based on whether given parameter is found in the title. Not case-sensitive. 
 
-- sort
+```sort```
 
 Sorts stories based on given parameter.
 
 Accepted Parameters:
 
-- 'title' - Alphabetic order of title.
-- 'score' - Ordered by score.
-- 'created' - Ordered by creation date.
-- 'modified' - Ordered by modification date. (including up and downvotes)
+- ```'title'``` - Alphabetic order of title.
+- ```'score'``` - Ordered by score.
+- ```'created'``` - Ordered by creation date.
+- ```'modified'``` - Ordered by modification date. (including up and downvotes)
 
-- order
+```order```
 
-Orders stories in the given way. Default is 'ascending'.
+Orders stories in the given way.
 
 Accepted Parameters:
 
-- 'ascending' - Order is lowest to highest.
-- 'descending' - Order is highest to lowest
+- ```'ascending'``` - Order is lowest to highest.
+- ```'descending'``` - Order is highest to lowest
 
-### /stories/<id>/votes - Methods: POST
+### ```/stories/<id>/votes```  ```(Methods: POST)```
 
 #### Parameters
 
-- id - ID of the article that is to be updated. ID must be a whole number.
+- ```id``` - ID of the article that is to be updated. ID must be a whole number.
 
 #### Methods
 
-- POST
+```POST```
 
 Updates the score of an article in the list. Updates the modification date of that article to the current time.
 
 Request Body:
 
-- 'direction' header - should contain either 'up' representing a score increase of 1 or 'down' representing a score decrease of 1.
+- ```'direction'``` header - should contain either ```'up'``` representing a score increase of 1 or ```'down'``` representing a score decrease of 1.
 
 Notes:
 
 Score cannot decrease below 0. Trying to send a 'down' request to an article with a score of 0 will result in an error.
 
-### /stories/<id> - Methods: PATCH, DELETE
+### ```/stories/<id>``` ```(Methods: PATCH, DELETE)```
 
 #### Parameters
 
-- id - ID of the article that is to be updated. ID must be a whole number.
+- ```id``` - ID of the article that is to be updated. ID must be a whole number.
 
 #### Methods
 
-- PATCH
+```PATCH```
 
 Updates the URL/website and/or title of an article in the list. Updates the modification date of that article to the current time.
 
 Request Body:
 
-- 'url' header - containing a link to the source of the article.
-- 'title' header - containing the title of the news article.
+- ```'url'``` header - containing a link to the source of the article.
+- ```'title'``` header - containing the title of the news article.
 
 Notes:
 
 - Request body can contain either a url or title or both. Must have at least one of the two. 
 
-- DELETE
+```DELETE```
 
 Deletes an article in the list.
 
-### /scrape - Methods: GET, POST
+### ```/scrape```  ```(Methods: GET, POST)```
 
 #### Methods
 
-- GET
+```GET```
 
 Returns the HTML for accepting a link to scrape news articles from.
 
-- POST
+```POST```
 
 Takes news articles from a given link and adds them to the article list.
 
 Request Body:
 
-- 'url' header - containing a link to a site with articles to scrape and add to the site.
+- ```'url'``` header - containing a link to a site with articles to scrape and add to the site.
 
 Notes: 
 
