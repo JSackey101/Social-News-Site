@@ -217,8 +217,8 @@ def scrape_story_info():
         return {"message": "BBC Scraped Successfully"}, 201
     return HelpApp.error_return("There must be a url header. "), 400
 
-
 if __name__ == "__main__":
     app.config['TESTING'] = True
     app.config['DEBUG'] = True
+    # Port is set to 8000 by default change it to a free port on your device.
     app.run(debug=True, host="0.0.0.0", port=8000)
