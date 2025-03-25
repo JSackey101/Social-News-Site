@@ -28,8 +28,10 @@ def parse_stories_bs(domain_url, html):
                       ) is not None or len(str(story.find('p')).split(" ")) < 5:
             continue
         story_dict = {}
+        print(str(story.find(
+            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah910")))
         story_dict['title'] = str(story.find(
-            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah96")).split(">")[2].split("<")[0]
+            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah910")).split(">")[2].split("<")[0]
         story_dict['url'] = domain_url + str(story.find("a")['href'])
         story_list.append(story_dict)
     return story_list
