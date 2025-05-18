@@ -18,6 +18,8 @@ def get_html(url):
 
 def parse_stories_bs(domain_url, html):
     """ Create a list of story dictionaries containing title and url for input HTML. """
+    if '//' not in domain_url.rsplit("/", 1)[0]:
+        domain_url += '/'
     stories_list = []
     soup = BeautifulSoup(html, "html.parser")
     stories_list = soup.css.select(".e1vyq2e80")
@@ -32,7 +34,9 @@ def parse_stories_bs(domain_url, html):
             continue
         story_dict = {}
         story_dict['title'] = title_tag.get_text().strip()
+        print(domain_url.rsplit("/", 1))
         story_dict['url'] = domain_url.rsplit("/", 1)[0] + story.find("a")['href']
+        print(story_dict['url'])
         story_list.append(story_dict)
     return story_list
 
