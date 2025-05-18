@@ -24,14 +24,18 @@ def parse_stories_bs(domain_url, html):
     story_list = []
     for story in stories_list:
         # Skips over BBC Videos and the Country News Pages.
-        if story.find('span', class_="visually-hidden ssrcss-1f39n02-VisuallyHidden e16en2lz0"
-                      ) is not None or len(str(story.find('p')).split(" ")) < 5:
+        if story.find('span',
+                      class_="visually-hidden ssrcss-1f39n02-VisuallyHidden e16en2lz0") is not None:
+            continue
+        title_tag = story.find(
+            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah910")
+        if not title_tag:
+            continue
+        if len(title_tag.get_text().strip()) < 5:
             continue
         story_dict = {}
-        print(str(story.find(
-            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah910")))
-        story_dict['title'] = str(story.find(
-            'p', class_="ssrcss-1b1mki6-PromoHeadline exn3ah910")).split(">")[2].split("<")[0]
+        print(str(title_tag))
+        story_dict['title'] = title_tag.get_text().strip()
         story_dict['url'] = domain_url + str(story.find("a")['href'])
         story_list.append(story_dict)
     return story_list
