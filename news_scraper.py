@@ -32,12 +32,12 @@ def parse_stories_bs(domain_url, html):
             continue
         story_dict = {}
         story_dict['title'] = title_tag.get_text().strip()
-        story_dict['url'] = domain_url + story.find("a")['href'] 
+        story_dict['url'] = domain_url.rsplit("/", 1)[0] + story.find("a")['href']
         story_list.append(story_dict)
     return story_list
 
 
 if __name__ == "__main__":
-    BBC_URL = "http://bbc.co.uk"
+    BBC_URL = "http://bbc.co.uk/news"
     bbc_html_doc = get_html(BBC_URL)
     stories = parse_stories_bs(domain_url=BBC_URL, html=bbc_html_doc)
