@@ -150,4 +150,4 @@ Notes:
 
 - Expanding scraping to work for more news sites.
 
-- Moving website storage to a PostgreSQL database rather than a CSV.
+- Moving website storage to a PostgreSQL database rather than a JSON.
